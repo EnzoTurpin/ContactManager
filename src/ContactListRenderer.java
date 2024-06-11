@@ -14,7 +14,7 @@ public class ContactListRenderer extends JPanel implements ListCellRenderer<Cont
         setLayout(new BorderLayout(5, 5));
         setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        JPanel textPanel = new JPanel(new GridLayout(2, 1));
+        JPanel textPanel = new JPanel(new GridLayout(3, 1));
         textPanel.add(nameLabel);
         textPanel.add(phoneLabel);
         textPanel.add(emailLabel);
@@ -71,7 +71,7 @@ public class ContactListRenderer extends JPanel implements ListCellRenderer<Cont
 
     @Override
     public Component getListCellRendererComponent(JList<? extends Contact> list, Contact contact, int index, boolean isSelected, boolean cellHasFocus) {
-        nameLabel.setText(contact.getName());
+        nameLabel.setText(contact.getFirstName() + " " + contact.getLastName());
         phoneLabel.setText(contact.getPhoneNumber());
         emailLabel.setText(contact.getEmail());
 

@@ -25,7 +25,6 @@ Ce projet utilise les bibliothèques suivantes, qui sont incluses dans le dossie
 - Java Development Kit (JDK) version 8 ou supérieure.
 - JTattoo pour l'apparence de l'interface utilisateur.
 - org.json pour la manipulation des données JSON.
-- JCalendar pour la sélection de dates.
 
 Aucune action supplémentaire n'est nécessaire pour installer ces dépendances, elles sont fournies pour une mise en place rapide et facile.
 

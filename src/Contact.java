@@ -1,33 +1,34 @@
 public class Contact {
-
-    private String name;
+    private String firstName;
+    private String lastName;
     private String phoneNumber;
     private String email;
     private String group;
+    private String biography;
 
-    // Constructeur par défaut
-    public Contact() {
-        this.name = "";
-        this.phoneNumber = "";
-        this.email = "";
-        this.group = "Général";
-    }
-
-    // Constructeur avec tous les paramètres
-    public Contact(String name, String phoneNumber, String email, String group) {
-        this.name = name;
+    public Contact(String firstName, String lastName, String phoneNumber, String email, String group, String biography) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.group = group;
+        this.biography = biography;
     }
 
-    // Getters et setters
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPhoneNumber() {
@@ -54,17 +55,16 @@ public class Contact {
         this.group = group;
     }
 
-    public String getFormattedPhoneNumber() {
-        return formatPhoneNumber(phoneNumber);
+    public String getBiography() {
+        return biography;
     }
 
-    private String formatPhoneNumber(String phoneNumber) {
-        String cleaned = phoneNumber.replaceAll("\\s", "");
-        return cleaned.replaceAll("(.{2})", "$1 ").trim();
+    public void setBiography(String biography) {
+        this.biography = biography;
     }
 
     @Override
     public String toString() {
-        return String.format("%s - %s - %s - %s", name, getFormattedPhoneNumber(), email, group);
+        return String.format("%s %s (%s)", firstName, lastName, group);
     }
 }

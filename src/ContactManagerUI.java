@@ -18,9 +18,8 @@ public class ContactManagerUI extends JFrame {
     private final JButton editButton = new JButton("Modifier");
     private final JTextField searchField = new JTextField(20); // Champ de recherche
     private final JComboBox<String> groupFilterComboBox = new JComboBox<>();
-    private final JComboBox<String> sortComboBox = new JComboBox<>(new String[]{"Trier A-Z", "Trier Z-A", "Trier par date"});
+    private final JComboBox<String> sortComboBox = new JComboBox<>(new String[]{"Trier A-Z", "Trier Z-A"});
     private List<Contact> allContacts = new ArrayList<>();
-    private Map<Contact, Date> contactAddDates = new HashMap<>(); // Store the add date for each contact
     private Set<String> groups;
     private String lastSelectedLetter = null; // To track the last selected letter
 
@@ -234,7 +233,7 @@ public class ContactManagerUI extends JFrame {
     private void scrollToLetter(String letter) {
         for (int i = 0; i < model.getSize(); i++) {
             Contact contact = model.getElementAt(i);
-            if (contact.getName().toUpperCase().startsWith(letter)) {
+            if (contact.getLastName().toUpperCase().startsWith(letter) || contact.getFirstName().toUpperCase().startsWith(letter)) {
                 list.ensureIndexIsVisible(i);
                 return;
             }
@@ -269,9 +268,6 @@ public class ContactManagerUI extends JFrame {
 
     private void loadContacts() {
         allContacts = ContactIO.loadContacts();
-        for (Contact contact : allContacts) {
-            contactAddDates.put(contact, new Date()); // Assuming you want to set the current date for existing contacts
-        }
         updateContactListDisplay(allContacts);
     }
 
@@ -284,7 +280,6 @@ public class ContactManagerUI extends JFrame {
         Contact contact = dialog.showDialog();
         if (contact != null) {
             allContacts.add(contact);
-            contactAddDates.put(contact, new Date()); // Store the current date as the add date
             filterContacts();
             saveAllContacts();
         }
@@ -295,7 +290,6 @@ public class ContactManagerUI extends JFrame {
         if (selectedIndex >= 0) {
             Contact selectedContact = list.getSelectedValue();
             allContacts.remove(selectedContact);
-            contactAddDates.remove(selectedContact); // Remove the add date entry
             filterContacts();
             saveAllContacts();
         }
@@ -309,8 +303,6 @@ public class ContactManagerUI extends JFrame {
             Contact updatedContact = dialog.showDialog();
             if (updatedContact != null) {
                 allContacts.set(selectedIndex, updatedContact);
-                Date addDate = contactAddDates.remove(contact);
-                contactAddDates.put(updatedContact, addDate); // Preserve the original add date
                 filterContacts();
                 saveAllContacts();
             }
@@ -326,7 +318,8 @@ public class ContactManagerUI extends JFrame {
         String selectedGroup = (String) groupFilterComboBox.getSelectedItem();
 
         List<Contact> filteredContacts = allContacts.stream()
-                .filter(contact -> contact.getName().toLowerCase().contains(finalSearchText) ||
+                .filter(contact -> contact.getFirstName().toLowerCase().contains(finalSearchText) ||
+                        contact.getLastName().toLowerCase().contains(finalSearchText) ||
                         contact.getPhoneNumber().toLowerCase().contains(finalSearchText) ||
                         contact.getEmail().toLowerCase().contains(finalSearchText))
                 .filter(contact -> "Tous".equals(selectedGroup) || contact.getGroup().equals(selectedGroup))
@@ -335,7 +328,8 @@ public class ContactManagerUI extends JFrame {
         // Appliquer le filtrage par lettre si une lettre est sélectionnée
         if (lastSelectedLetter != null) {
             filteredContacts = filteredContacts.stream()
-                    .filter(contact -> contact.getName().toUpperCase().startsWith(lastSelectedLetter))
+                    .filter(contact -> contact.getLastName().toUpperCase().startsWith(lastSelectedLetter) ||
+                            contact.getFirstName().toUpperCase().startsWith(lastSelectedLetter))
                     .collect(Collectors.toList());
         }
 
@@ -353,14 +347,11 @@ public class ContactManagerUI extends JFrame {
         Comparator<Contact> comparator;
         switch (selectedSort) {
             case "Trier Z-A":
-                comparator = Comparator.comparing(Contact::getName).reversed();
-                break;
-            case "Trier par date":
-                comparator = Comparator.comparing(contactAddDates::get);
+                comparator = Comparator.comparing(Contact::getLastName).reversed();
                 break;
             case "Trier A-Z":
             default:
-                comparator = Comparator.comparing(Contact::getName);
+                comparator = Comparator.comparing(Contact::getLastName);
                 break;
         }
 
