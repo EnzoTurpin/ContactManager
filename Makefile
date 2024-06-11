@@ -1,5 +1,5 @@
 # Nom de la classe principale
-MAIN_CLASS=TaskManagerUI
+MAIN_CLASS=ContactManagerUI
 
 # Dossier pour les fichiers compilés
 BIN_DIR := bin
@@ -14,12 +14,12 @@ CP_SEP := ;
 CLASSPATH := $(BIN_DIR)$(CP_SEP)$(LIB_DIR)/*
 
 # Liste explicite des fichiers source
-SOURCES := src/TaskIO.java \
-           src/TaskDialog.java \
-           src/Task.java \
-           src/TaskListRenderer.java \
-           src/TaskManagerUI.java \
-           src/TaskTransferHandler.java \
+SOURCES := src/ContactIO.java \
+           src/ContactDialog.java \
+           src/Contact.java \
+           src/ContactListRenderer.java \
+           src/ContactManagerUI.java \
+           src/ContactTransferHandler.java \
            src/EncryptionUtility.java \
            src/CategoryManager.java
 
