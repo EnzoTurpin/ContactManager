@@ -12,6 +12,7 @@ public class ContactManagerUI extends JFrame {
 
     private final DefaultListModel<Contact> model = new DefaultListModel<>();
     private final JList<Contact> list = new JList<>(model);
+    private final JList<String> alphabetList = new JList<>(createAlphabetModel());
     private final JButton addButton = new JButton("Ajouter");
     private final JButton deleteButton = new JButton("Supprimer");
     private final JButton editButton = new JButton("Modifier");
@@ -21,6 +22,7 @@ public class ContactManagerUI extends JFrame {
     private List<Contact> allContacts = new ArrayList<>();
     private Map<Contact, Date> contactAddDates = new HashMap<>(); // Store the add date for each contact
     private Set<String> groups;
+    private String lastSelectedLetter = null; // To track the last selected letter
 
     public ContactManagerUI() {
         setTitle("Gestionnaire de Contacts");
@@ -29,7 +31,7 @@ public class ContactManagerUI extends JFrame {
         groups = CategoryManager.loadCategories();
         initializeUI();
         loadContacts();
-        setSize(500, 400);
+        setSize(600, 400); // Augmentez la taille de la fenêtre pour accueillir l'alphabetList
         setLocationRelativeTo(null);
     }
 
@@ -37,7 +39,19 @@ public class ContactManagerUI extends JFrame {
         list.setCellRenderer(new ContactListRenderer());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(list);
-        add(scrollPane, BorderLayout.CENTER);
+        
+        // Configuration de l'alphabetList
+        alphabetList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        alphabetList.setFixedCellWidth(20);
+        alphabetList.setFixedCellHeight(20);
+        JScrollPane alphabetScrollPane = new JScrollPane(alphabetList);
+
+        // Panneau principal avec la liste des contacts à gauche et l'alphabet à droite
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(alphabetScrollPane, BorderLayout.EAST);
+
+        add(mainPanel, BorderLayout.CENTER);
 
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
@@ -54,6 +68,7 @@ public class ContactManagerUI extends JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
 
         setupButtonListeners();
+        setupAlphabetListeners();
         setupListListeners();
     }
 
@@ -159,6 +174,28 @@ public class ContactManagerUI extends JFrame {
         });
     }
 
+    private void setupAlphabetListeners() {
+        alphabetList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int index = alphabetList.locationToIndex(e.getPoint());
+                if (index >= 0) {
+                    String letter = alphabetList.getModel().getElementAt(index);
+                    if (letter.equals(lastSelectedLetter)) {
+                        alphabetList.clearSelection();
+                        lastSelectedLetter = null;
+                        filterContacts();
+                    } else {
+                        lastSelectedLetter = letter;
+                        alphabetList.setSelectedIndex(index);
+                        scrollToLetter(letter);
+                        filterContacts();
+                    }
+                }
+            }
+        });
+    }
+
     private void setupListListeners() {
         list.addMouseListener(new MouseAdapter() {
             @Override
@@ -192,6 +229,16 @@ public class ContactManagerUI extends JFrame {
                 }
             }
         });
+    }
+
+    private void scrollToLetter(String letter) {
+        for (int i = 0; i < model.getSize(); i++) {
+            Contact contact = model.getElementAt(i);
+            if (contact.getName().toUpperCase().startsWith(letter)) {
+                list.ensureIndexIsVisible(i);
+                return;
+            }
+        }
     }
 
     private void callPhoneNumber(String phoneNumber) {
@@ -285,6 +332,13 @@ public class ContactManagerUI extends JFrame {
                 .filter(contact -> "Tous".equals(selectedGroup) || contact.getGroup().equals(selectedGroup))
                 .collect(Collectors.toList());
 
+        // Appliquer le filtrage par lettre si une lettre est sélectionnée
+        if (lastSelectedLetter != null) {
+            filteredContacts = filteredContacts.stream()
+                    .filter(contact -> contact.getName().toUpperCase().startsWith(lastSelectedLetter))
+                    .collect(Collectors.toList());
+        }
+
         updateContactListDisplay(filteredContacts);
     }
 
@@ -315,6 +369,14 @@ public class ContactManagerUI extends JFrame {
                 .collect(Collectors.toList());
 
         updateContactListDisplay(sortedContacts);
+    }
+
+    private DefaultListModel<String> createAlphabetModel() {
+        DefaultListModel<String> alphabetModel = new DefaultListModel<>();
+        for (char c = 'A'; c <= 'Z'; c++) {
+            alphabetModel.addElement(String.valueOf(c));
+        }
+        return alphabetModel;
     }
 
     public static void main(String[] args) {
