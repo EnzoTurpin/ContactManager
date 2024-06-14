@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.net.URI;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,21 +7,24 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+// Classe ContactManagerUI pour l'interface utilisateur de gestion des contacts
 public class ContactManagerUI extends JFrame {
 
+    // Modèle de liste pour les contacts
     private final DefaultListModel<Contact> model = new DefaultListModel<>();
     private final JList<Contact> list = new JList<>(model);
     private final JList<String> alphabetList = new JList<>(createAlphabetModel());
     private final JButton addButton = new JButton("Ajouter");
     private final JButton deleteButton = new JButton("Supprimer");
     private final JButton editButton = new JButton("Modifier");
-    private final JTextField searchField = new JTextField(20); // Champ de recherche
+    private final JTextField searchField = new JTextField(20);
     private final JComboBox<String> groupFilterComboBox = new JComboBox<>();
     private final JComboBox<String> sortComboBox = new JComboBox<>(new String[]{"Trier A-Z", "Trier Z-A"});
     private List<Contact> allContacts = new ArrayList<>();
     private Set<String> groups;
-    private String lastSelectedLetter = null; // To track the last selected letter
+    private String lastSelectedLetter = null;
 
+    // Constructeur pour initialiser l'interface utilisateur
     public ContactManagerUI() {
         setTitle("Gestionnaire de Contacts");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -30,10 +32,11 @@ public class ContactManagerUI extends JFrame {
         groups = CategoryManager.loadCategories();
         initializeUI();
         loadContacts();
-        setSize(600, 400); // Augmentez la taille de la fenêtre pour accueillir l'alphabetList
+        setSize(600, 400);
         setLocationRelativeTo(null);
     }
 
+    // Méthode pour initialiser l'interface utilisateur
     private void initializeUI() {
         list.setCellRenderer(new ContactListRenderer());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -57,8 +60,8 @@ public class ContactManagerUI extends JFrame {
         list.setTransferHandler(new ContactTransferHandler(this::saveAllContacts));
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel filterPanel = setupFilterPanel(); // Panneau de filtre et de tri
-        JPanel searchPanel = setupSearchPanel(); // Panneau de recherche
+        JPanel filterPanel = setupFilterPanel();
+        JPanel searchPanel = setupSearchPanel();
         topPanel.add(filterPanel, BorderLayout.NORTH);
         topPanel.add(searchPanel, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
@@ -71,6 +74,7 @@ public class ContactManagerUI extends JFrame {
         setupListListeners();
     }
 
+    // Méthode pour configurer le panneau de filtre et de tri
     private JPanel setupFilterPanel() {
         JPanel filterPanel = new JPanel();
         filterPanel.add(new JLabel("Groupe:"));
@@ -104,6 +108,7 @@ public class ContactManagerUI extends JFrame {
         return filterPanel;
     }
 
+    // Méthode pour configurer le panneau de recherche
     private JPanel setupSearchPanel() {
         JPanel searchPanel = new JPanel();
         searchPanel.add(new JLabel("Rechercher :"));
@@ -151,6 +156,7 @@ public class ContactManagerUI extends JFrame {
         return searchPanel;
     }
 
+    // Méthode pour configurer le panneau de boutons
     private JPanel setupButtonPanel() {
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(addButton);
@@ -159,20 +165,14 @@ public class ContactManagerUI extends JFrame {
         return buttonPanel;
     }
 
+    // Méthode pour configurer les écouteurs de boutons
     private void setupButtonListeners() {
         addButton.addActionListener(e -> addContact());
         deleteButton.addActionListener(e -> deleteSelectedContact());
         editButton.addActionListener(e -> editSelectedContact());
-        list.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    editSelectedContact();
-                }
-            }
-        });
     }
 
+    // Méthode pour configurer les écouteurs de l'alphabet
     private void setupAlphabetListeners() {
         alphabetList.addMouseListener(new MouseAdapter() {
             @Override
@@ -195,41 +195,19 @@ public class ContactManagerUI extends JFrame {
         });
     }
 
+    // Méthode pour configurer les écouteurs de la liste de contacts
     private void setupListListeners() {
         list.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int index = list.locationToIndex(e.getPoint());
-                Contact contact = model.getElementAt(index);
-
-                Rectangle cellBounds = list.getCellBounds(index, index);
-                Component component = list.getCellRenderer().getListCellRendererComponent(list, contact, index, false, false);
-
-                if (component instanceof JPanel) {
-                    JPanel panel = (JPanel) component;
-                    Component clickedComponent = panel.getComponentAt(e.getPoint().x - cellBounds.x, e.getPoint().y - cellBounds.y);
-
-                    if (clickedComponent instanceof JButton) {
-                        JButton button = (JButton) clickedComponent;
-                        if ("phoneButton".equals(button.getName())) {
-                            callPhoneNumber(contact.getPhoneNumber());
-                        } else if ("emailButton".equals(button.getName())) {
-                            sendEmail(contact.getEmail());
-                        }
-                    } else if (clickedComponent instanceof JLabel) {
-                        JLabel label = (JLabel) clickedComponent;
-                        ContactListRenderer renderer = (ContactListRenderer) list.getCellRenderer();
-                        if (label == renderer.getPhoneLabel()) {
-                            callPhoneNumber(contact.getPhoneNumber());
-                        } else if (label == renderer.getEmailLabel()) {
-                            sendEmail(contact.getEmail());
-                        }
-                    }
+                if (e.getClickCount() == 2) {
+                    editSelectedContact();
                 }
             }
         });
     }
 
+    // Méthode pour faire défiler la liste jusqu'à une lettre spécifique
     private void scrollToLetter(String letter) {
         for (int i = 0; i < model.getSize(); i++) {
             Contact contact = model.getElementAt(i);
@@ -240,41 +218,18 @@ public class ContactManagerUI extends JFrame {
         }
     }
 
-    private void callPhoneNumber(String phoneNumber) {
-        try {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI("tel:" + phoneNumber));
-            } else {
-                JOptionPane.showMessageDialog(this, "L'action de téléphonie n'est pas supportée sur ce système.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erreur lors de l'ouverture de l'application de téléphonie.", "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void sendEmail(String email) {
-        try {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MAIL)) {
-                Desktop.getDesktop().mail(new URI("mailto:" + email));
-            } else {
-                JOptionPane.showMessageDialog(this, "L'action de messagerie n'est pas supportée sur ce système.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erreur lors de l'ouverture de l'application de messagerie.", "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
+    // Méthode pour charger les contacts
     private void loadContacts() {
         allContacts = ContactIO.loadContacts();
         updateContactListDisplay(allContacts);
     }
 
+    // Méthode pour sauvegarder tous les contacts
     private void saveAllContacts() {
         ContactIO.saveAllContacts(new ArrayList<>(Collections.list(model.elements())));
     }
 
+    // Méthode pour ajouter un nouveau contact
     private void addContact() {
         ContactDialog dialog = new ContactDialog(this, groups);
         Contact contact = dialog.showDialog();
@@ -285,6 +240,7 @@ public class ContactManagerUI extends JFrame {
         }
     }
 
+    // Méthode pour supprimer le contact sélectionné
     private void deleteSelectedContact() {
         int selectedIndex = list.getSelectedIndex();
         if (selectedIndex >= 0) {
@@ -295,6 +251,7 @@ public class ContactManagerUI extends JFrame {
         }
     }
 
+    // Méthode pour éditer le contact sélectionné
     private void editSelectedContact() {
         int selectedIndex = list.getSelectedIndex();
         if (selectedIndex >= 0) {
@@ -309,6 +266,7 @@ public class ContactManagerUI extends JFrame {
         }
     }
 
+    // Méthode pour filtrer les contacts en fonction de la recherche, du groupe et de l'alphabet
     private void filterContacts() {
         String searchText = searchField.getText().toLowerCase();
         if (searchText.equals("chercher...")) {
@@ -336,11 +294,13 @@ public class ContactManagerUI extends JFrame {
         updateContactListDisplay(filteredContacts);
     }
 
+    // Méthode pour mettre à jour l'affichage de la liste des contacts
     private void updateContactListDisplay(List<Contact> contacts) {
         model.clear();
         contacts.forEach(model::addElement);
     }
 
+    // Méthode pour trier les contacts
     private void sortContacts() {
         String selectedSort = (String) sortComboBox.getSelectedItem();
 
@@ -362,6 +322,7 @@ public class ContactManagerUI extends JFrame {
         updateContactListDisplay(sortedContacts);
     }
 
+    // Méthode pour créer le modèle de l'alphabet
     private DefaultListModel<String> createAlphabetModel() {
         DefaultListModel<String> alphabetModel = new DefaultListModel<>();
         for (char c = 'A'; c <= 'Z'; c++) {
@@ -370,6 +331,7 @@ public class ContactManagerUI extends JFrame {
         return alphabetModel;
     }
 
+    // Méthode main pour lancer l'application
     public static void main(String[] args) {
         Locale.setDefault(Locale.forLanguageTag("fr-FR"));
         try {

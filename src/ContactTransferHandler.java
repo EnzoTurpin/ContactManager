@@ -6,14 +6,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 
+// Classe ContactTransferHandler pour gérer le glisser-déposer des contacts dans une liste
 public class ContactTransferHandler extends TransferHandler {
 
     private final ContactChangeListener listener;
 
+    // Constructeur prenant un écouteur de changement de contact
     public ContactTransferHandler(ContactChangeListener listener) {
         this.listener = listener;
     }
 
+    // Crée un objet transférable à partir de la valeur sélectionnée dans la liste
     @Override
     protected Transferable createTransferable(JComponent c) {
         JList<?> sourceList = (JList<?>) c;
@@ -24,16 +27,19 @@ public class ContactTransferHandler extends TransferHandler {
         return null;
     }
 
+    // Définir les actions source autorisées (ici, déplacement)
     @Override
     public int getSourceActions(JComponent c) {
         return MOVE;
     }
 
+    // Vérifie si le transfert de données peut être importé
     @Override
     public boolean canImport(TransferSupport support) {
         return support.isDataFlavorSupported(TransferableContact.CONTACT_FLAVOR);
     }
 
+    // Importer les données transférées
     @Override
     public boolean importData(TransferSupport support) {
         if (!canImport(support)) {
@@ -49,6 +55,7 @@ public class ContactTransferHandler extends TransferHandler {
                 DefaultListModel<Contact> listModel = (DefaultListModel<Contact>) component.getModel();
                 Contact contact = (Contact) support.getTransferable().getTransferData(TransferableContact.CONTACT_FLAVOR);
 
+                // Si le contact est déjà dans la liste, le déplacer
                 if (listModel.contains(contact)) {
                     int currentIndex = listModel.indexOf(contact);
                     listModel.remove(currentIndex);
@@ -59,6 +66,7 @@ public class ContactTransferHandler extends TransferHandler {
                 listModel.add(index, contact);
                 component.setSelectedIndex(index);
 
+                // Notifier l'écouteur de changement de liste
                 if (listener != null) {
                     listener.onContactListChanged();
                 }
@@ -70,10 +78,12 @@ public class ContactTransferHandler extends TransferHandler {
         return false;
     }
 
+    // Interface pour écouter les changements de la liste de contacts
     public interface ContactChangeListener {
         void onContactListChanged();
     }
 
+    // Classe interne pour représenter un contact transférable
     private record TransferableContact(Contact contact) implements Transferable {
         public static final DataFlavor CONTACT_FLAVOR = new DataFlavor(Contact.class, "Contact");
 

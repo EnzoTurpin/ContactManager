@@ -1,0 +1,34 @@
+[
+    {
+        "firstName": "ggdgsds",
+        "lastName": "skqk",
+        "phoneNumber": "09828828",
+        "email": "ihihih@ynov.com",
+        "group": "Travail",
+        "biography": ""
+    },
+    {
+        "firstName": "Test",
+        "lastName": "test",
+        "phoneNumber": "07678743",
+        "email": "jkhdf@gmail.com",
+        "group": "Travail",
+        "biography": "d"
+    },
+    {
+        "firstName": "Enzo",
+        "lastName": "Turpin",
+        "phoneNumber": "0672925527",
+        "email": "enzoturpin35@orange.fr",
+        "group": "Travail",
+        "biography": "Salut"
+    },
+    {
+        "firstName": "Daryl",
+        "lastName": "Matro",
+        "phoneNumber": "08764343",
+        "email": "daryl@orange.fr",
+        "group": "Travail",
+        "biography": "ez"
+    }
+]

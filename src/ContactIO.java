@@ -13,13 +13,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+// Classe ContactIO pour gérer l'entrée/sortie des contacts
 public class ContactIO {
 
-    private static final String CONTACTS_FILE = "resources/contacts.json";
-    private static final String UNENCRYPTED_CONTACTS_FILE = "resources/unencrypted_contacts.json";
+    // Chemins des fichiers de contacts
+    private static final String CONTACTS_FILE = "ressources/contacts.json";
+    private static final String UNENCRYPTED_CONTACTS_FILE = "ressources/unencrypted_contacts.json";
+    // Clé secrète pour le chiffrement
     private static final SecretKey key = EncryptionUtility.getOrGenerateKey();
     public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm";
 
+    // Méthode pour charger les contacts à partir du fichier crypté
     public static List<Contact> loadContacts() {
         List<Contact> contacts = new ArrayList<>();
         File file = new File(CONTACTS_FILE);
@@ -29,10 +33,12 @@ public class ContactIO {
         }
 
         try {
+            // Lire et décrypter le contenu du fichier
             String encryptedContent = Files.readString(file.toPath(), StandardCharsets.UTF_8);
             String decryptedContent = EncryptionUtility.decrypt(encryptedContent, key);
             JSONArray contactsJson = new JSONArray(decryptedContent);
 
+            // Convertir chaque entrée JSON en objet Contact
             for (int i = 0; i < contactsJson.length(); i++) {
                 JSONObject contactObject = contactsJson.getJSONObject(i);
                 Contact contact = new Contact(
@@ -41,7 +47,7 @@ public class ContactIO {
                     contactObject.optString("phoneNumber", ""),
                     contactObject.optString("email", ""),
                     contactObject.optString("group", ""),
-                    contactObject.optString("biography", "")  // Ajouter la biographie
+                    contactObject.optString("biography", "")
                 );
                 contacts.add(contact);
             }
@@ -52,6 +58,7 @@ public class ContactIO {
         return contacts;
     }
 
+    // Méthode pour sauvegarder tous les contacts dans les fichiers crypté et non crypté
     public static void saveAllContacts(List<Contact> contacts) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
@@ -65,15 +72,17 @@ public class ContactIO {
             JSONObject contactObject = new JSONObject();
 
             try {
+                // Ajouter les détails du contact à l'objet JSON
                 contactObject.put("firstName", contact.getFirstName());
                 contactObject.put("lastName", contact.getLastName());
                 contactObject.put("phoneNumber", contact.getPhoneNumber());
                 contactObject.put("email", contact.getEmail());
                 contactObject.put("group", contact.getGroup());
-                contactObject.put("biography", contact.getBiography());  // Ajouter la biographie
+                contactObject.put("biography", contact.getBiography());
 
                 contactsJsonForEncryption.put(contactObject);
 
+                // Construire la chaîne JSON non cryptée pour sauvegarde
                 String unencryptedContactJson = String.format(
                     "    {\n" +
                     "        \"firstName\": \"%s\",\n" +
@@ -81,7 +90,7 @@ public class ContactIO {
                     "        \"phoneNumber\": \"%s\",\n" +
                     "        \"email\": \"%s\",\n" +
                     "        \"group\": \"%s\",\n" +
-                    "        \"biography\": \"%s\"\n" +  // Ajouter la biographie
+                    "        \"biography\": \"%s\"\n" +
                     "    }",
                     contact.getFirstName(),
                     contact.getLastName(),
@@ -131,6 +140,7 @@ public class ContactIO {
         }
     }
 
+    // Méthode pour initialiser un fichier crypté vide
     private static void initializeEmptyEncryptedFile(File file) {
         try {
             if (file.createNewFile()) {

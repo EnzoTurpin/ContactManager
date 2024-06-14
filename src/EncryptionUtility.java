@@ -10,7 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class EncryptionUtility {
 
   private static final String ALGORITHM = "AES";
-  private static final Path KEY_FILE_PATH = Paths.get("resources/keyfile.txt");
+  private static final Path KEY_FILE_PATH = Paths.get("ressources/keyfile.txt");
 
   // Récupère la clé existante ou en génère une nouvelle si nécessaire.
   public static SecretKey getOrGenerateKey() {
